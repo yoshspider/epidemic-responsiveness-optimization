@@ -1,0 +1,4 @@
+kind,metric,beta,average_dose,target,reference
+geographic,mask,0.36,0.41557522455548745,40.0,"Uniform per-capita intervention, expected over eight aggregate-prior maps"
+geographic,vaccine,0.36,0.40296537540669464,40.0,"Uniform per-capita intervention, expected over eight aggregate-prior maps"
+real_fall,mask,0.3,0.0814767555823977,40.0,"Uniform per-capita intervention, expected over eight aggregate-prior maps"

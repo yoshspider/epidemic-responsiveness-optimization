@@ -1,0 +1,21 @@
+{
+  "beta_local": 0.22,
+  "beta_mobility": 0.04,
+  "recovery_rate": 0.14285714285714285,
+  "dt": 1,
+  "efficacy": 0.5,
+  "saturation": 1,
+  "retention_daily": 0.95,
+  "decision_days": 7,
+  "horizon_days": 28,
+  "budget": 12000,
+  "budget_mode": "weekly",
+  "chunk": 25000,
+  "prior": 0.776,
+  "objective": "infections",
+  "stochastic": false,
+  "stochastic_adoption": false,
+  "candidate_batch": 32,
+  "ifr": [0.001, 0.05],
+  "mixing": [[1, 1], [1, 1]]
+}
