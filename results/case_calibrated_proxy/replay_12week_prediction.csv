@@ -1,0 +1,3 @@
+scenario,policy,counties,rmse
+nyt_mask,population_only,3133,0.10111510034603868
+nyt_rank_sensitivity,population_only,3133,0.2614185129474726

@@ -79,10 +79,11 @@ def main():
                          holdout_rmse=np.sqrt(np.mean(heldout**2))))
     result = pd.DataFrame(rows)
     result.to_csv(out / "summary.csv", index=False)
-    start, susceptible, infected, _, _ = periods[8]
     counties.to_csv(out / "counties.csv", index=False)
-    np.savez_compressed(out / "initial_holdout.npz", n=n, s=susceptible, i=infected,
-                        fips=counties.fips.to_numpy(dtype="U5"))
+    for name, week in (("initial_replay", 0), ("initial_holdout", 8)):
+        _, susceptible, infected, _, _ = periods[week]
+        np.savez_compressed(out / f"{name}.npz", n=n, s=susceptible, i=infected,
+                            fips=counties.fips.to_numpy(dtype="U5"))
     (out / "manifest.json").write_text(json.dumps(dict(
         counties=len(n), train_weeks=[str(p[0].date()) for p in periods[:8]],
         holdout_weeks=[str(p[0].date()) for p in periods[8:]],

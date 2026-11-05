@@ -1,12 +1,13 @@
 """Case-calibrated, stochastic proxy allocation benchmark for November 2020."""
 
+import argparse
 import json
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from scipy import sparse
-from scipy.stats import binom, t
+from scipy.stats import binom, rankdata, t
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GroupKFold
@@ -49,23 +50,23 @@ def simulate(plan, truth, n, s, i, matrices, beta, m, uniforms):
 
 
 def main():
-    OUT.mkdir(parents=True, exist_ok=True)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--weeks", type=int, choices=(4, 12), default=4)
+    args = parser.parse_args()
+    full = args.weeks == 12
+    out = OUT.with_name("case_calibrated_proxy_12week") if full else OUT
+    out.mkdir(parents=True, exist_ok=True)
     fitted = pd.read_csv(CALIBRATION / "summary.csv").set_index("model").loc["fit_both"]
     beta, m = fitted.beta_total, fitted.m
-    with np.load(CALIBRATION / "initial_holdout.npz") as initial:
+    initial_file = "initial_replay.npz" if full else "initial_holdout.npz"
+    with np.load(CALIBRATION / initial_file) as initial:
         n, s, i, fips = (initial[key] for key in ("n", "s", "i", "fips"))
-    matrices = [sparse.load_npz(CALIBRATION / f"mobility_{w}.npz") for w in range(8, 12)]
+    matrices = [sparse.load_npz(CALIBRATION / f"mobility_{w}.npz")
+                for w in range(12 - args.weeks, 12)]
     geography = pd.DataFrame({"fips": fips, "log_population": np.log(n)})
     mask = pd.read_csv("data/raw/nyt_mask_use.csv", dtype={"COUNTYFP": str}).set_index("COUNTYFP")
     july = (mask.ALWAYS + mask.FREQUENTLY + .5 * mask.SOMETIMES).reindex(fips).to_numpy()
-    ctis = pd.read_csv("data/transformed/ctis_october2020_monthly_proxy.csv", dtype={"fips": str})
-    ctis = ctis.loc[(ctis.month == "2020-10") & (ctis.observed_days >= 20)].set_index("fips")
-    october = ctis.responsiveness.reindex(fips).to_numpy()
-    tweets = pd.read_csv("outputs/tbcov_prediction/county_sentiment.csv", dtype={"fips": str})
-    data = geography.merge(tweets, on="fips", validate="one_to_one", how="left")
-    data["log_posts"] = np.log1p(data.post_count.fillna(0))
-    states = data.fips.str[:2]
-    observed = np.isfinite(october)
+    states = geography.fips.str[:2]
     if not np.isfinite(july).all():
         raise ValueError("NYT masking is missing for a calibration county")
     reference = np.full(len(n), REFERENCE)
@@ -76,16 +77,28 @@ def main():
                         DOSE, starts, 60, schedule="weekly")[0]
 
     baseline = plan(reference)
-    scenarios = {
-        "nyt_mask": (july, {"population_only": predict(july, data[["log_population"]], states)}),
-        "ctis_mask": (np.where(observed, october, REFERENCE), {
+    pop = geography[["log_population"]]
+    scenarios = {"nyt_mask": (july, {"population_only": predict(july, pop, states)})}
+    if full:
+        ranked = (rankdata(july) - .5) / len(july)
+        scenarios["nyt_rank_sensitivity"] = (ranked, {
+            "population_only": predict(ranked, pop, states),
+        })
+    else:
+        ctis = pd.read_csv("data/transformed/ctis_october2020_monthly_proxy.csv", dtype={"fips": str})
+        ctis = ctis.loc[(ctis.month == "2020-10") & (ctis.observed_days >= 20)].set_index("fips")
+        october = ctis.responsiveness.reindex(fips).to_numpy()
+        observed = np.isfinite(october)
+        tweets = pd.read_csv("outputs/tbcov_prediction/county_sentiment.csv", dtype={"fips": str})
+        data = geography.merge(tweets, on="fips", validate="one_to_one", how="left")
+        data["log_posts"] = np.log1p(data.post_count.fillna(0))
+        scenarios["ctis_mask"] = (np.where(observed, october, REFERENCE), {
             "population_only": predict(october, data[["log_population"]], states),
             "population_activity": predict(october, data[["log_population", "log_posts"]], states),
             "population_activity_sentiment": predict(
                 october, data[["log_population", "log_posts", "mean_sentiment",
                                "positive_share", "negative_share"]], states),
-        }),
-    }
+        })
     records, prediction = [], []
     for scenario, (truth, predictors) in scenarios.items():
         plans = {"none": np.zeros_like(uniform), "uniform": uniform, "uninformed": baseline}
@@ -108,7 +121,7 @@ def main():
                     np.testing.assert_allclose(schedule @ n, DOSE*n.sum(), rtol=1e-8)
                 cases = simulate(schedule, truth, n, s, i, matrices, beta, m, uniforms)
                 records.append(dict(scenario=scenario, seed=seed, policy=label, infections=cases))
-        np.savez_compressed(OUT / f"{scenario}_plans.npz", fips=fips, **plans)
+        np.savez_compressed(out / f"{scenario}_plans.npz", fips=fips, **plans)
 
     trials = pd.DataFrame(records)
     summary = []
@@ -123,13 +136,15 @@ def main():
                                 paired_extra_prevented=differences.mean(),
                                 ci_low=differences.mean()-half, ci_high=differences.mean()+half))
     result = pd.DataFrame(summary)
-    result.to_csv(OUT / "summary.csv", index=False)
-    trials.to_csv(OUT / "trials.csv", index=False)
-    pd.DataFrame(prediction).to_csv(OUT / "prediction.csv", index=False)
-    (OUT / "manifest.json").write_text(json.dumps(dict(
-        counties=len(n), ctis_counties=int(observed.sum()),
-        ctis_tweet_counties=int((observed & data.mean_sentiment.notna()).sum()),
-        beta=beta, m=m, weeks="2020-11-02 to 2020-11-29",
+    result.to_csv(out / "summary.csv", index=False)
+    trials.to_csv(out / "trials.csv", index=False)
+    pd.DataFrame(prediction).to_csv(out / "prediction.csv", index=False)
+    coverage = {} if full else dict(ctis_counties=int(observed.sum()),
+                                    ctis_tweet_counties=int((observed & data.mean_sentiment.notna()).sum()))
+    (out / "manifest.json").write_text(json.dumps(dict(
+        counties=len(n), **coverage,
+        beta=beta, m=m, weeks="2020-09-07 to 2020-11-29" if full else "2020-11-02 to 2020-11-29",
+        calibration_overlap=full,
         uniform_dose=DOSE, uninformed_reference=REFERENCE, paired_draws=DRAWS,
         interpretation="Stochastic historical-input counterfactual with assumed masking response."
     ), indent=2))

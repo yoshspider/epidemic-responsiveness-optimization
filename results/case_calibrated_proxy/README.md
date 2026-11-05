@@ -65,6 +65,32 @@ Values are average simulated infections, rounded to the nearest infection. The J
 
 [Policy summary](summary.csv) · [Paired trials](trials.csv) · [Prediction errors](prediction.csv) · [Scenario manifest](manifest.json)
 
+## Full 12-week replay and bridge
+
+The full replay uses the NYT-initialized September 7 state and all twelve observed GeoDS weeks through November 29. It uses the same fitted transmission coefficients, weekly budget, planning algorithm, and paired binomial draws as the four-week run. The fitting period overlaps the first eight weeks, so this is a retrospective scenario. July masking precedes the start date. The October CTIS and September tweet comparison remains in the November window to preserve the ordering of the inputs.
+
+The full replay tests both raw July masking fractions and their county percentile ranks. The rank sensitivity preserves the ordering of counties while changing the mean and spread of the response assumed by the simulator. Treat the two results as different intervention assumptions.
+
+The bridge starts every run with the same November 2 county state. It crosses the fitted transmission rate or the earlier 0.36 setting with four or twelve weeks and raw or ranked July masking. For the twelve-week bridge, the November mobility sequence repeats. Each run replans for its own assumptions. The weekly budget stays fixed, so the longer horizon also gives three times as many weeks of intervention. Bridge totals use expected-count rollouts. A paired check on the original November raw scenario additionally compares a planner that knows only the national mean response with a planner that knows individual county scores.
+
+### What changed over twelve weeks
+
+| September–November replay | No intervention | Epidemic only | Population predictor | Survey oracle |
+|---|---:|---:|---:|---:|
+| Raw July masking | 3,655,533 | 263,982 | 258,207 | 257,163 |
+| Ranked July masking sensitivity | 3,655,533 | 438,904 | 428,682 | 404,805 |
+
+The epidemic-only policy avoids **3.39 million** modeled infections in the raw scenario. Exact county scores avoid a further **6,818 (2.58%)**, compared with **34,099 (7.77%)** when the response model uses ranks. These are paired stochastic results. See the [12-week summary](replay_12week_summary.csv), [paired trials](replay_12week_trials.csv) and [manifest](replay_12week_manifest.json).
+
+| Bridge setup | Oracle advantage with raw masking | Oracle advantage with ranked masking |
+|---|---:|---:|
+| Fitted transmission, 4 weeks | 11,404 | 20,419 |
+| Fitted transmission, 12 weeks | 12,167 | 72,206 |
+| High transmission, 4 weeks | 150,411 | 1,519,881 |
+| High transmission, 12 weeks | 90,541,077 | 65,122,827 |
+
+Each bridge cell compares the oracle against the planner using a constant 0.5. The big raw-score difference in the high-transmission 12-week cell includes a correction to the assumed overall response level. A planner given only the national mean response reduced the modeled total from 131.65M to 44.68M. The oracle then reduced it to 41.11M, an additional **3.57M (8.0%)** from knowing the county scores in this high-transmission setting. The high transmission coefficient is an assumed sensitivity setting. See the [full bridge](bridge_summary.csv) and [paired November diagnostic](bridge_november_paired.csv).
+
 ## Reproduce
 
 From the repository root, prepare the historical inputs and surveys using the [data setup guide](../us_weekly_information/REPRODUCE.md). Prepare the September tweet aggregates with the existing TBCOV pipeline. It requires the September 2020 archive and may take time.
@@ -73,6 +99,8 @@ From the repository root, prepare the historical inputs and surveys using the [d
 python -m epidemic.tbcov_pipeline --archive data/raw/tbcov_september2020.zip
 python -m epidemic.us_weekly_case_calibration
 python -m epidemic.us_case_calibrated_proxy
+python -m epidemic.us_case_calibrated_proxy --weeks 12
+python -m epidemic.us_case_calibration_bridge
 ```
 
 The first command builds county tweet features from the archive. The next command writes calibration and initialization files to outputs/weekly_case_calibration. The final command writes policy schedules, prediction errors, and paired simulation results to outputs/case_calibrated_proxy.
