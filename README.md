@@ -31,6 +31,7 @@ python -m unittest discover -s tests -v
 - A separate 64-world confirmation illustrates a moderate-intervention regime: perfect information reduces new infections by **34.1% relative to the uninformed policy**; synthetic noisy measurements with SD 0.15 recover a **24.9% reduction**. The budget in this diagnostic was selected to target a moderate uninformed effect; the informed outcomes were not fixed.
 - U.S.-geography simulations show double-digit benefits from measured mask information in some settings. Stronger population-only controls explain much of the apparent benefit of demographic predictors.
 - Historical COVID replay effects are materially smaller. Neither the Twitter features nor the observational surveys have established causal intervention responsiveness.
+- The weekly U.S. benchmark tests perfect information on 16 synthetic responsiveness maps, then separately tests survey proxies and a population-only control. See the [short results report](results/us_weekly_information/README.md).
 
 See the exported tables, full parameter grids, and each result manifest for exact settings and negative findings. Do not mix results from the earlier capped-adoption model with the current exponential-response model.
 

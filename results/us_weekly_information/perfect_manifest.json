@@ -1,0 +1,19 @@
+{
+  "phase": "HELD-OUT CONFIRMATION; no empirical proxy tested",
+  "response_worlds": 16,
+  "seeds": "1011000\u20131011015, disjoint from development and prior calibration",
+  "mechanism": "Recipient exponential attenuation exp(-p*d); original proposal form",
+  "p": "Independent Uniform(0,1) by county, fixed over time; no survey values or rank transformations",
+  "data": "Actual Census populations and twelve observed weekly GeoDS networks; synthetic initial epidemic; not a historical COVID forecast",
+  "beta": 0.36,
+  "mobility": 0.15,
+  "mean_dose_per_week": 0.8,
+  "days": 84,
+  "schedule": "Twelve weekly resource allocations planned over full horizon; same budget each week",
+  "baseline": "Frozen ensemble-optimized uninformed weekly plan, selected using eight independent prior validation worlds; identical in every confirmation batch",
+  "baseline_array_sha256": "e5eb18f0eb1ea805d7dac4df29b9f379523994a773e49f461c6f875f2f143083",
+  "prior_scheme": "County-stratified Uniform simulation, eight training and eight validation maps",
+  "optimizer": "Static80-iteration initialization plus80-iteration weekly refinement; finite local optimization, not global optimality or PPO",
+  "uncertainty": "Paired t intervals for absolute gains and10000-paired-world bootstrap intervals for relative gains; uncertainty over synthetic response assignments only",
+  "limitation": "No causal responsiveness estimate or empirical proxy effectiveness claim"
+}

@@ -8,6 +8,7 @@ These are derived simulation outputs and figures, not raw datasets.
 - `us_historical/`: retrospective 2020 case initialization and transmission calibration. Survey-as-responsiveness assumptions remain unvalidated.
 - `us_moderate/`: aggregate-prior budget calibration, without location-specific true response labels.
 - `network_aware/`: local numerical horizon planning and paired stochastic evaluations. Each scenario has its own manifest, optimizer diagnostics and comparator-specific effects.
+- [`us_weekly_information/`](us_weekly_information/): held-out perfect-information benchmark and fixed-budget survey proxy comparisons on the U.S. network.
 - `figures/`: county proxy inputs, spread snapshots, benefit maps and parameter sensitivity.
 - `provenance/`: source audit and dataset hashes. No credentials or individual-level records are included.
 
