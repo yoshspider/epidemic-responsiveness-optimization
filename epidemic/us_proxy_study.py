@@ -74,7 +74,11 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--historical-only', action='store_true')
+    parser.add_argument('--prepare-only', action='store_true',
+                        help='Write geographic inputs without running the legacy policy grid')
     args = parser.parse_args()
+    if args.historical_only and args.prepare_only:
+        parser.error('--historical-only and --prepare-only cannot be combined')
     checks()
     root = Path('outputs/us_proxy_study')
     root.mkdir(exist_ok=True)
@@ -112,6 +116,9 @@ def main():
                     spearmanr(
                         surveys['mask'], surveys['vaccine']).statistic))
     (out / 'cross_survey_agreement.json').write_text(json.dumps(agreement, indent=2))
+    if args.prepare_only:
+        print(f'Prepared {len(n):,} counties and {len(matrices)} weekly matrices in {out}')
+        return
     doses = np.arange(0, 8.0001, .1)
     zgrid = np.arange(0, 8.0001, .025)
     records = []
