@@ -30,6 +30,18 @@ Each planner selects twelve weekly county doses to minimize the number of new in
 
 The percentage is the difference in mean modeled infections divided by the epidemic-only mean. All three planners use the same weekly budget. [Summary](summary.csv) · [Paired trials](trials.csv) · [Model settings](manifest.json)
 
+## Smaller intervention budget
+
+The fitted reference with no added intervention produces 7.03 million modeled infections. We chose a weekly dose of 0.10713 to put the epidemic-only plan near 3.5 million in an expected-count rollout. Budget selection used only the epidemic-only outcome. We then fixed the dose for all three planners and evaluated 16 paired stochastic runs.
+
+| Planner | Mean modeled infections | Fewer than epidemic only |
+|---|---:|---:|
+| Epidemic only | 3,500,157 | 0% |
+| County predictor | 3,455,778 | 1.27% |
+| Exact county scores | 3,326,142 | 4.97% |
+
+The smaller budget reduces the assumed overall intervention impact to about 50% of the reference. This is a budget sensitivity with an illustrative target. The historical case curve calibrates transmission, while the model assumes the intervention effect. [Summary](lower_budget_summary.csv) · [Paired trials](lower_budget_trials.csv) · [Model settings](lower_budget_manifest.json)
+
 ## Reproduce
 
 Prepare the [case, mobility, survey, and county data](../us_weekly_information/REPRODUCE.md#2-download-and-prepare-the-inputs). This comparison uses the national bootstrap data, including the CDC SVI file.
@@ -37,6 +49,7 @@ Prepare the [case, mobility, survey, and county data](../us_weekly_information/R
 ```bash
 python -m epidemic.us_weekly_case_calibration
 python -m epidemic.us_case_calibrated_proxy
+python -m epidemic.us_case_calibrated_proxy --target-baseline 3500000
 ```
 
 The second command writes the summary, per-seed trials, and model settings to outputs/case_calibrated_main. The [previous experimental record](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/e3f7b5b/results/case_calibrated_proxy) preserves the budget, longer-horizon, and tweet feature diagnostics.

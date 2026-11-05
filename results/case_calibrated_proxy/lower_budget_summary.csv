@@ -1,0 +1,4 @@
+policy,mean_infections,fewer_than_epidemic_only_pct
+epidemic_only,3500156.9375,0.0
+county_predictor,3455777.9375,1.26791457618749
+exact_county_scores,3326141.5625,4.971644932135277
