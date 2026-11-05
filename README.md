@@ -8,6 +8,18 @@ The project studies how knowledge of county responsiveness changes allocation in
 
 **Interpretation:** synthetic mechanism results demonstrate potential. Assigning survey fractions as responsiveness is a modeling assumption; the empirical-input simulations do not identify causal effects of spending.
 
+## Main result at the smaller budget
+
+In the 12-week U.S. replay, the reference with no added intervention produced **7.03 million modeled infections**. We chose a smaller weekly dose to bring epidemic-only planning near **3.5 million**, then held that dose fixed for all three planners across 16 paired simulation runs.
+
+| Planner | Mean modeled infections | Fewer than epidemic-only planning |
+|---|---:|---:|
+| Epidemic only | 3,500,157 | Baseline |
+| County predictor | 3,455,778 | **1.27%** |
+| Exact county scores (oracle) | 3,326,142 | **4.97%** |
+
+The case data calibrate transmission. The budget target is illustrative, and the intervention effect uses county masking ranks as a proxy for responsiveness. [Smaller-budget methods and results](results/case_calibrated_proxy/README.md#smaller-intervention-budget)
+
 ## Start here
 
 ```bash
@@ -27,11 +39,8 @@ python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 python -m unittest discover -s tests -v
 ```
 
-## Main result
+[Larger-budget comparison](results/case_calibrated_proxy/README.md#results) · [Earlier controlled simulations and maps](results/us_weekly_information/README.md)
 
-The county predictor yields **4.67% fewer modeled infections** than epidemic-only planning. Exact county scores yield **11.38% fewer** against the same baseline. [Three-planner results and assumptions](results/case_calibrated_proxy/README.md)
-
-[Earlier controlled simulations and maps](results/us_weekly_information/README.md)
 ## Model and comparisons
 
 Daily infections follow a bounded SIR hazard, with recovery probability `1-exp(-1/7)`. County populations are conserved. Weekly incoming mobility matrices have destination rows and source columns; self edges are removed and incoming rows normalized.
