@@ -13,8 +13,10 @@ class ResponsivenessMechanismTests(unittest.TestCase):
         z = np.random.default_rng(42).normal(0, .3, (12, 3))
         dose = allocate(z, n, .6)
         np.testing.assert_allclose(dose @ n, np.full(12, .6 * n.sum()))
+        weekly_beta = np.linspace(.18, .36, 12)
         for mechanism in ['recipient', 'both_ends']:
-            args = (n, n * .99, n * .01, np.array([.2, .6, .9]), [matrix] * 12, .3, .15, mechanism)
+            args = (n, n * .99, n * .01, np.array([.2, .6, .9]),
+                    [matrix] * 12, weekly_beta, .15, mechanism)
             value, grad = objective(dose, *args)
             tangent = dose * (1 - dose / 8)
             derivative = tangent * (grad - n[None, :] * (grad * tangent).sum(axis=1)[:, None] /

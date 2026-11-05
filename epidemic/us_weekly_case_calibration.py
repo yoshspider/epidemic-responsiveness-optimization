@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import least_squares
+from scipy.optimize import brentq, least_squares
 
 from .us_proxy_study import national_matrices
 
@@ -122,6 +122,25 @@ def main():
     comparison = pd.DataFrame(comparisons)
     comparison.to_csv(out / "continuous_summary.csv", index=False)
     pd.DataFrame(series).to_csv(out / "continuous_weekly_totals.csv", index=False)
+
+    # Fit one effective rate per week to national totals on matched county-days.
+    # The replay state carries forward and the mobility split is fixed beforehand.
+    mobility_share = continuous_fit.x[1] / continuous_fit.x.sum()
+    tracking, state = [], None
+    for week, period in enumerate(periods):
+        valid = keep[week]
+        target = observed[week][valid].sum()
+
+        def replay(rate):
+            return forecast(period, rate * (1 - mobility_share),
+                            rate * mobility_share, state=state)
+
+        rate = brentq(lambda rate: replay(rate)[0][valid].sum() - target, 0, 1.5)
+        estimated, state = replay(rate)
+        tracking.append(dict(week=period[0].date(), beta=rate, mobility_share=mobility_share,
+                             observed=target, fitted=estimated[valid].sum(),
+                             modeled_all_counties=estimated.sum()))
+    pd.DataFrame(tracking).to_csv(out / "weekly_tracking_fit.csv", index=False)
     counties.to_csv(out / "counties.csv", index=False)
     for name, week in (("initial_replay", 0), ("initial_holdout", 8)):
         _, susceptible, infected, _, _ = periods[week]

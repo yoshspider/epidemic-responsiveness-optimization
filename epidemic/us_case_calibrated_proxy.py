@@ -38,9 +38,10 @@ def simulate(plan, truth, n, s, i, matrices, beta, m, uniforms):
     s, i = s.astype(np.int64), i.astype(np.int64)
     initial = s.sum()
     recovery = -np.expm1(-1 / 7)
+    weekly_beta = np.broadcast_to(np.asarray(beta, dtype=float), (len(matrices),))
     for day, (u_new, u_recovered) in enumerate(uniforms):
         week = day // 7
-        h = force(i, n, truth, plan[week], matrices[week], beta, m, "recipient")
+        h = force(i, n, truth, plan[week], matrices[week], weekly_beta[week], m, "recipient")
         new = binom.ppf(u_new, s, -np.expm1(-h)).astype(np.int64)
         recovered = binom.ppf(u_recovered, i, recovery).astype(np.int64)
         s -= new
@@ -52,8 +53,8 @@ def main():
     """Evaluate three planners on one response surface and one historical window."""
     out = OUT.with_name("case_calibrated_main")
     out.mkdir(parents=True, exist_ok=True)
-    fitted = pd.read_csv(CALIBRATION / "summary.csv").set_index("model").loc["fit_both"]
-    beta, mobility = fitted.beta_total, fitted.m
+    fitted = pd.read_csv(CALIBRATION / "weekly_tracking_fit.csv")
+    beta, mobility = fitted.beta.to_numpy(), float(fitted.mobility_share.iloc[0])
     with np.load(CALIBRATION / "initial_replay.npz") as initial:
         n, s, i, fips = (initial[key] for key in ("n", "s", "i", "fips"))
     matrices = [sparse.load_npz(CALIBRATION / f"mobility_{week}.npz") for week in range(12)]
@@ -106,7 +107,8 @@ def main():
     trials.to_csv(out / "trials.csv", index=False)
     np.savez_compressed(out / "plans.npz", fips=fips, **plans)
     (out / "manifest.json").write_text(json.dumps(dict(
-        counties=len(n), beta=beta, mobility_share=mobility, weeks="2020-09-07 to 2020-11-29",
+        counties=len(n), weekly_beta=beta.tolist(), mobility_share=mobility,
+        weeks="2020-09-07 to 2020-11-29", calibration="Retrospective weekly national case tracking",
         calibration_overlap=True, weekly_dose=DOSE, epidemic_only_reference=REFERENCE,
         paired_draws=DRAWS, target="NYT July masking percentiles as assumed response",
         features=features.columns.tolist(),

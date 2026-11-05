@@ -14,7 +14,9 @@ Responsiveness in this run is the percentile rank of each county's July NYT mask
 
 ## Model and evaluation
 
-The case fit estimates local and mobility transmission from eight weeks of reported county cases and checks the following four weeks. The fitted coefficients are 0.1047 and 0.0346 per day, respectively. The allocation replay overlaps the fit window. Earlier calibration checks also show that a constant-rate model misses much of the November surge.
+The original constant-rate replay missed the November surge. This run carries the case-initialized SIR state forward continuously and fits one effective transmission rate per week to match that week's national case count on the same reporting county-days. The fitted rates range from 0.127 to 0.181 per day. The mobility share is fixed at 0.431 from the continuous fit on the first eight weeks. Every planner uses the same rates and observed mobility.
+
+The national weekly match is by construction and uses all twelve weeks of outcomes. Treat this as a retrospective counterfactual with observed epidemic timing. It does not validate county-level trajectories or estimate what a planner could forecast in real time. [Weekly case fit](weekly_tracking_fit.csv)
 
 Each planner selects twelve weekly county doses to minimize the number of new infections in an expected-count SIR rollout, with a population-weighted weekly dose of 0.8. The dose multiplies the daily infection hazard by $e^{-p_i d_{iw}}$. We then evaluate all three preplanned schedules in 16 matched stochastic runs, drawing daily infections and recoveries from binomial distributions.
 
@@ -23,8 +25,8 @@ Each planner selects twelve weekly county doses to minimize the number of new in
 | Planner | Fewer modeled infections vs. epidemic only |
 |---|---:|
 | Epidemic only | 0% (baseline) |
-| County predictor | **2.96%** |
-| Exact county scores | **7.77%** |
+| County predictor | **4.67%** |
+| Exact county scores | **11.38%** |
 
 The percentage is the difference in mean modeled infections divided by the epidemic-only mean. All three planners use the same weekly budget. [Summary](summary.csv) · [Paired trials](trials.csv) · [Model settings](manifest.json)
 

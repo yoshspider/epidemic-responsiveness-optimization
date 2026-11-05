@@ -25,6 +25,7 @@ def objective(dose, n, s0, i0, responses, matrices, beta, mobility, mechanism, g
     dose = np.asarray(dose)
     is_weekly = dose.ndim == 2
     weeks = len(matrices)
+    weekly_beta = np.broadcast_to(np.asarray(beta, dtype=float), (weeks,))
     weekly_dose = dose if is_weekly else np.tile(dose, (weeks, 1))
     p = np.asarray(responses, dtype=float)
     if p.ndim == 1:
@@ -39,6 +40,7 @@ def objective(dose, n, s0, i0, responses, matrices, beta, mobility, mechanism, g
     initial_s = s.copy()
     history = []
     for day in range(7 * weeks):
+        beta = weekly_beta[day // 7]
         matrix = matrices[day // 7]
         g = protection[day // 7]
         if mechanism == 'recipient':
@@ -57,6 +59,7 @@ def objective(dose, n, s0, i0, responses, matrices, beta, mobility, mechanism, g
     adj_i = np.zeros_like(i)
     grad = np.zeros((weeks, *s.shape))
     for day in reversed(range(7 * weeks)):
+        beta = weekly_beta[day // 7]
         s, i = history[day]
         matrix = matrices[day // 7]
         g = protection[day // 7]

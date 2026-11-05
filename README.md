@@ -29,7 +29,7 @@ python -m unittest discover -s tests -v
 
 ## Main result
 
-The county predictor yields **2.96% fewer modeled infections** than epidemic-only planning. Exact county scores yield **7.77% fewer** against the same baseline. [Three-planner results and assumptions](results/case_calibrated_proxy/README.md)
+The county predictor yields **4.67% fewer modeled infections** than epidemic-only planning. Exact county scores yield **11.38% fewer** against the same baseline. [Three-planner results and assumptions](results/case_calibrated_proxy/README.md)
 
 [Earlier controlled simulations and maps](results/us_weekly_information/README.md)
 ## Model and comparisons
