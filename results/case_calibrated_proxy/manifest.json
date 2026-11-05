@@ -1,12 +1,26 @@
 {
   "counties": 3133,
-  "ctis_counties": 451,
-  "ctis_tweet_counties": 436,
   "beta": 0.1392460195360466,
-  "m": 0.2481366362908028,
-  "weeks": "2020-11-02 to 2020-11-29",
-  "uniform_dose": 0.8,
-  "uninformed_reference": 0.5,
+  "mobility_share": 0.2481366362908028,
+  "weeks": "2020-09-07 to 2020-11-29",
+  "calibration_overlap": true,
+  "weekly_dose": 0.8,
+  "epidemic_only_reference": 0.5,
   "paired_draws": 16,
-  "interpretation": "Stochastic historical-input counterfactual with assumed masking response."
+  "target": "NYT July masking percentiles as assumed response",
+  "features": [
+    "E_PCI",
+    "EP_POV",
+    "EP_UNEMP",
+    "EP_NOHSDP",
+    "EP_AGE65",
+    "EP_DISABL",
+    "EP_SNGPNT",
+    "EP_LIMENG",
+    "EP_NOVEH",
+    "EP_UNINSUR",
+    "log_population",
+    "log_density"
+  ],
+  "heldout_rmse": 0.2523019300697997
 }

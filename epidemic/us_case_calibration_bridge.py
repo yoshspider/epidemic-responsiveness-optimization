@@ -79,13 +79,7 @@ def main():
         for key, truth in responses.items():
             proxy = plan(predictions[key], [blind])
             policies = {"none": zero, "uninformed": blind, "population_proxy": proxy}
-            oracle_starts = [blind, proxy]
-            if key == "raw":
-                # Diagnostic only: reveal the aggregate score mean, not county labels.
-                policies["mean_only_diagnostic"] = plan(np.full(len(n), truth.mean()), [blind])
-                if settings.historical_budgets:
-                    oracle_starts.append(policies["mean_only_diagnostic"])
-            policies["oracle"] = plan(truth, oracle_starts)
+            policies["oracle"] = plan(truth, [blind, proxy])
             cases = {name: objective(dose, *args, truth, *physics, False)
                      for name, dose in policies.items()}
             for name, value in cases.items():

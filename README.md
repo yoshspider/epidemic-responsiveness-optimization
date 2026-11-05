@@ -2,9 +2,9 @@
 
 Can county-level behavioral information improve the allocation of a fixed epidemic-intervention budget?
 
-**Main experiment:** [Case-calibrated proxy analysis](results/case_calibrated_proxy/README.md) fits transmission from NYT cases, evaluates policies with paired stochastic runs, and tests whether tweet sentiment adds value beyond population and tweet count. The earlier fixed-rate U.S. scenarios remain controlled benchmarks.
+**Main experiment:** [Case-calibrated proxy analysis](results/case_calibrated_proxy/README.md) compares three planners over the same twelve weeks: epidemic only, a county predictor, and exact county scores. The replay uses NYT cases, observed mobility, and paired stochastic runs.
 
-This research project compares policies with **aggregate information**, **measured county proxies**, and **predicted responsiveness** in a mobility-coupled SIR model. It includes controlled mechanism experiments, U.S. county counterfactuals, prediction checks, PPO experiments, and geographic figures.
+The project studies how knowledge of county responsiveness changes allocation in a mobility-coupled SIR model. It includes controlled mechanism experiments, U.S. county counterfactuals, prediction checks, PPO experiments, and geographic figures.
 
 **Interpretation:** synthetic mechanism results demonstrate potential. Assigning survey fractions as responsiveness is a modeling assumption; the empirical-input simulations do not identify causal effects of spending.
 
