@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy import sparse
-from scipy.stats import binom, rankdata, t
+from scipy.stats import binom, rankdata
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import GroupKFold
@@ -97,18 +97,11 @@ def main():
             records.append(dict(seed=seed, policy=label, infections=cases))
     trials = pd.DataFrame(records)
     wide = trials.pivot(index="seed", columns="policy", values="infections")
-    baseline = wide.epidemic_only.mean()
-    exact_gain = baseline - wide.exact_county_scores.mean()
-    summary = []
-    for label in plans:
-        gain = wide.epidemic_only - wide[label]
-        half_width = t.ppf(.975, DRAWS - 1) * gain.sem()
-        summary.append(dict(policy=label, mean_infections=wide[label].mean(),
-                            fewer_than_epidemic_only_pct=100 * gain.mean() / baseline,
-                            paired_extra_prevented=gain.mean(),
-                            share_of_exact_gain_pct=100 * gain.mean() / exact_gain if exact_gain else None,
-                            ci_low=gain.mean() - half_width, ci_high=gain.mean() + half_width))
-    result = pd.DataFrame(summary)
+    mean_infections = wide.loc[:, list(plans)].mean()
+    result = mean_infections.rename_axis("policy").rename("mean_infections").reset_index()
+    result["fewer_than_epidemic_only_pct"] = (
+        100 * (1 - result.mean_infections / mean_infections["epidemic_only"])
+    )
     result.to_csv(out / "summary.csv", index=False)
     trials.to_csv(out / "trials.csv", index=False)
     np.savez_compressed(out / "plans.npz", fips=fips, **plans)
@@ -116,7 +109,7 @@ def main():
         counties=len(n), beta=beta, mobility_share=mobility, weeks="2020-09-07 to 2020-11-29",
         calibration_overlap=True, weekly_dose=DOSE, epidemic_only_reference=REFERENCE,
         paired_draws=DRAWS, target="NYT July masking percentiles as assumed response",
-        features=features.columns.tolist(), heldout_rmse=float(np.sqrt(np.mean((predicted-truth)**2))),
+        features=features.columns.tolist(),
     ), indent=2))
     print(result.to_string(index=False))
 

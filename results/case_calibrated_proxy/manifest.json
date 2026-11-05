@@ -21,6 +21,5 @@
     "EP_UNINSUR",
     "log_population",
     "log_density"
-  ],
-  "heldout_rmse": 0.2523019300697997
+  ]
 }

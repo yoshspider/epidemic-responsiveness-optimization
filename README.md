@@ -27,16 +27,11 @@ python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
 python -m unittest discover -s tests -v
 ```
 
-## Current evidence
+## Main result
 
-- The fixed-budget synthetic grid shows substantial information value across budgets; all tested settings are retained, rather than reporting only a favorable cell.
-- A separate 64-world confirmation illustrates a moderate-intervention regime: perfect information reduces new infections by **34.1% relative to the uninformed policy**; synthetic noisy measurements with SD 0.15 recover a **24.9% reduction**. The budget in this diagnostic was selected to target a moderate uninformed effect; the informed outcomes were not fixed.
-- U.S.-geography simulations show double-digit benefits from measured mask information in some settings. Stronger population-only controls explain much of the apparent benefit of demographic predictors.
-- Historical COVID replay effects are materially smaller. Neither the Twitter features nor the observational surveys have established causal intervention responsiveness.
-- The weekly U.S. benchmark tests perfect information on 16 synthetic responsiveness maps, then separately tests survey proxies and a population-only control. See the [weekly study walkthrough and animation](results/us_weekly_information/README.md) or the [fresh-checkout reproduction guide](results/us_weekly_information/REPRODUCE.md).
+The county predictor yields **2.96% fewer modeled infections** than epidemic-only planning. Exact county scores yield **7.77% fewer** against the same baseline. [Three-planner results and assumptions](results/case_calibrated_proxy/README.md)
 
-See the exported tables, full parameter grids, and each result manifest for exact settings and negative findings. Do not mix results from the earlier capped-adoption model with the current exponential-response model.
-
+[Earlier controlled simulations and maps](results/us_weekly_information/README.md)
 ## Model and comparisons
 
 Daily infections follow a bounded SIR hazard, with recovery probability `1-exp(-1/7)`. County populations are conserved. Weekly incoming mobility matrices have destination rows and source columns; self edges are removed and incoming rows normalized.
