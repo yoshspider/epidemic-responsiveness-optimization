@@ -1,0 +1,72 @@
+{
+  "counties": 3133,
+  "train_weeks": [
+    "2020-09-07",
+    "2020-09-14",
+    "2020-09-21",
+    "2020-09-28",
+    "2020-10-05",
+    "2020-10-12",
+    "2020-10-19",
+    "2020-10-26"
+  ],
+  "holdout_weeks": [
+    "2020-11-02",
+    "2020-11-09",
+    "2020-11-16",
+    "2020-11-23"
+  ],
+  "initialization": "Seven days of NYT reports are infectious; earlier reports removed; remaining residents susceptible. No multiplier.",
+  "evaluation": "One-week predictions reinitialized with prior observed reports; no fitting to held-out outcomes.",
+  "loss": "County-day RMSE on sqrt(reported cases + 0.375); missing and negative observations excluded.",
+  "revisions": [
+    {
+      "week": "2020-09-07",
+      "excluded_county_weeks": 46
+    },
+    {
+      "week": "2020-09-14",
+      "excluded_county_weeks": 22
+    },
+    {
+      "week": "2020-09-21",
+      "excluded_county_weeks": 15
+    },
+    {
+      "week": "2020-09-28",
+      "excluded_county_weeks": 15
+    },
+    {
+      "week": "2020-10-05",
+      "excluded_county_weeks": 23
+    },
+    {
+      "week": "2020-10-12",
+      "excluded_county_weeks": 9
+    },
+    {
+      "week": "2020-10-19",
+      "excluded_county_weeks": 14
+    },
+    {
+      "week": "2020-10-26",
+      "excluded_county_weeks": 8
+    },
+    {
+      "week": "2020-11-02",
+      "excluded_county_weeks": 8
+    },
+    {
+      "week": "2020-11-09",
+      "excluded_county_weeks": 7
+    },
+    {
+      "week": "2020-11-16",
+      "excluded_county_weeks": 5
+    },
+    {
+      "week": "2020-11-23",
+      "excluded_county_weeks": 4
+    }
+  ]
+}

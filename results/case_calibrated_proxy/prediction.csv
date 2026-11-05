@@ -1,0 +1,5 @@
+scenario,policy,counties,rmse
+nyt_mask,population_only,3133,0.10111510034603868
+ctis_mask,population_only,451,0.05805105469658619
+ctis_mask,population_activity,451,0.058230107735548195
+ctis_mask,population_activity_sentiment,451,0.05568572032365067

@@ -24,7 +24,8 @@ def objective(dose, n, s0, i0, responses, matrices, beta, mobility, mechanism, g
         raise ValueError('Unknown intervention mechanism')
     dose = np.asarray(dose)
     is_weekly = dose.ndim == 2
-    weekly_dose = dose if is_weekly else np.tile(dose, (12, 1))
+    weeks = len(matrices)
+    weekly_dose = dose if is_weekly else np.tile(dose, (weeks, 1))
     p = np.asarray(responses, dtype=float)
     if p.ndim == 1:
         p = p[:, None]
@@ -37,7 +38,7 @@ def objective(dose, n, s0, i0, responses, matrices, beta, mobility, mechanism, g
                         (2 if mechanism == 'both_ends' else 1))
     initial_s = s.copy()
     history = []
-    for day in range(84):
+    for day in range(7 * weeks):
         matrix = matrices[day // 7]
         g = protection[day // 7]
         if mechanism == 'recipient':
@@ -54,8 +55,8 @@ def objective(dose, n, s0, i0, responses, matrices, beta, mobility, mechanism, g
         return loss
     adj_s = np.zeros_like(s)
     adj_i = np.zeros_like(i)
-    grad = np.zeros((12, *s.shape))
-    for day in reversed(range(84)):
+    grad = np.zeros((weeks, *s.shape))
+    for day in reversed(range(7 * weeks)):
         s, i = history[day]
         matrix = matrices[day // 7]
         g = protection[day // 7]
@@ -101,8 +102,9 @@ def allocate(z, n, average, cap=8.):
 
 def optimize(n, s, i, responses, matrices, beta, mobility, mechanism,
              average, starts=(), iterations=50, schedule='static'):
-    shape = (12, len(n)) if schedule == 'weekly' else (len(n),)
-    candidates = [np.full(shape, average)] + [np.tile(candidate, (12, 1)) if schedule ==
+    weeks = len(matrices)
+    shape = (weeks, len(n)) if schedule == 'weekly' else (len(n),)
+    candidates = [np.full(shape, average)] + [np.tile(candidate, (weeks, 1)) if schedule ==
                                               'weekly' and np.asarray(candidate).ndim == 1 else candidate for candidate in starts]
     best_start = min(
         candidates,

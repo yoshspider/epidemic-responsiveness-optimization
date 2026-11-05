@@ -1,0 +1,12 @@
+{
+  "counties": 3133,
+  "ctis_counties": 451,
+  "ctis_tweet_counties": 436,
+  "beta": 0.1392460195360466,
+  "m": 0.2481366362908028,
+  "weeks": "2020-11-02 to 2020-11-29",
+  "uniform_dose": 0.8,
+  "uninformed_reference": 0.5,
+  "paired_draws": 16,
+  "interpretation": "Stochastic historical-input counterfactual with assumed masking response."
+}
