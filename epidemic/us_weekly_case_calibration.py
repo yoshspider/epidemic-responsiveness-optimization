@@ -41,8 +41,10 @@ def main():
         corrections.append({"week": str(start.date()), "excluded_county_weeks": int((~valid).sum())})
         periods.append((start, susceptible, infected, matrix, observed))
 
-    def forecast(period, local, mobility):
+    def forecast(period, local, mobility, state=None):
         _, s, i, matrix, _ = period
+        if state is not None:
+            s, i = state
         s, i = s.copy(), i.copy()
         daily = []
         for _ in range(7):
@@ -52,7 +54,7 @@ def main():
             i += new - i * -np.expm1(-1 / 7)
             s -= new
             daily.append(new)
-        return np.asarray(daily)
+        return np.asarray(daily), (s, i)
 
     def residual(parameters, split=None, subset=periods[:8]):
         local, mobility = parameters if split is None else (parameters[0]*(1-split),
@@ -61,7 +63,7 @@ def main():
         for period in subset:
             observed = period[-1]
             keep = np.isfinite(observed)
-            estimated = forecast(period, local, mobility)[keep]
+            estimated = forecast(period, local, mobility)[0][keep]
             errors.append(np.sqrt(estimated + .375) - np.sqrt(observed[keep] + .375))
         return np.concatenate(errors)
 
@@ -79,6 +81,47 @@ def main():
                          holdout_rmse=np.sqrt(np.mean(heldout**2))))
     result = pd.DataFrame(rows)
     result.to_csv(out / "summary.csv", index=False)
+
+    def continuous(parameters, subset):
+        state = None
+        estimates = []
+        for period in subset:
+            daily, state = forecast(period, *parameters, state=state)
+            estimates.append(daily)
+        return np.asarray(estimates)
+
+    observed = np.asarray([period[-1] for period in periods])
+    keep = np.isfinite(observed)
+
+    def replay_errors(estimated, subset):
+        valid = keep[subset]
+        return np.sqrt(estimated[subset][valid] + .375) - np.sqrt(observed[subset][valid] + .375)
+
+    training, holdout = slice(8), slice(8, None)
+    rolling_rates = result.loc[result.model == "fit_both", ["beta_local", "beta_mobility"]].to_numpy()[0]
+    continuous_fit = least_squares(
+        lambda rates: replay_errors(continuous(rates, periods[:8]), training),
+        rolling_rates, bounds=(0, 1.5),
+    )
+    if not continuous_fit.success:
+        raise RuntimeError(continuous_fit.message)
+    comparisons, series = [], []
+    for name, rates in (("weekly_reset_fit", rolling_rates), ("continuous_fit", continuous_fit.x)):
+        estimated = continuous(rates, periods)
+        total = rates.sum()
+        comparisons.append(dict(model=name, beta_local=rates[0], beta_mobility=rates[1],
+                                beta_total=total, m=rates[1] / total,
+                                train_rmse=np.sqrt(np.mean(replay_errors(estimated, training)**2)),
+                                holdout_rmse=np.sqrt(np.mean(replay_errors(estimated, holdout)**2)),
+                                model_total=estimated.sum()))
+        for index, (start, *_rest) in enumerate(periods):
+            valid = keep[index]
+            series.append(dict(model=name, week=start.date(), holdout=index >= 8,
+                               observed=np.nansum(observed[index]),
+                               predicted_on_reported_days=estimated[index][valid].sum()))
+    comparison = pd.DataFrame(comparisons)
+    comparison.to_csv(out / "continuous_summary.csv", index=False)
+    pd.DataFrame(series).to_csv(out / "continuous_weekly_totals.csv", index=False)
     counties.to_csv(out / "counties.csv", index=False)
     for name, week in (("initial_replay", 0), ("initial_holdout", 8)):
         _, susceptible, infected, _, _ = periods[week]
@@ -93,6 +136,7 @@ def main():
         revisions=corrections,
     ), indent=2))
     print(result.to_string(index=False))
+    print(comparison.to_string(index=False))
 
 
 if __name__ == "__main__":

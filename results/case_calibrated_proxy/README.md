@@ -115,6 +115,23 @@ The two right-hand columns compare against epidemic-only planning separately wit
 
 Each column is relative to the national-average planner under the same epidemic and raw masking assumption. The last row comes from the earlier bridge. The other rows are in the [intermediate growth results](growth_grid_summary.csv).
 
+## Checking the historical fit and intervention dose
+
+The faster-spread benchmark is a sensitivity experiment. Its approximately 300 million modeled infections without intervention are far above the reported-case scale of the September–November 2020 replay. In the replay, case data initialize the epidemic and fit its transmission parameters.
+
+The first fit started from reported county states each week during calibration. The allocation simulation starts only once. To align those procedures, a second fit starts on September 7 and carries its states forward continuously. It minimizes the same square-root-scale county-day loss on the first eight weeks, then uses the frozen rates for the final four weeks. On this continuous holdout, county-day RMSE fell from 3.80 to 3.57. The continuous fit modeled 4.11 million cases across all twelve weeks, compared with 3.66 million under the original coefficients. On scored county-days in the four-week holdout, it predicted 1.55 million cases versus 4.08 million reported. The constant-rate replay still misses the rise in November. See the [continuous calibration](continuous_calibration.csv) and [matched weekly totals](continuous_weekly_totals.csv).
+
+The budget sensitivity keeps the same twelve observed mobility weeks, September initialization and raw July masking scores. It uses mean-count rollouts at weekly doses 0.05, 0.15, 0.35 and 0.8. Each comparison holds the dose fixed across policies. The national-average planner receives a single nationwide response level. This makes it possible to distinguish county-specific information from simply correcting the epidemic-only planner's common 0.5 assumption.
+
+| Weekly dose | Epidemic only | National average | Population proxy | County-score oracle | Proxy gain vs. national average |
+|---|---:|---:|---:|---:|---:|
+| 0.05 | 2,722,221 | 2,694,259 | 2,693,426 | 2,686,818 | 0.03% |
+| 0.15 | 1,636,824 | 1,605,270 | 1,603,656 | 1,598,277 | 0.10% |
+| 0.35 | 794,375 | 770,344 | 769,120 | 766,530 | 0.16% |
+| 0.8 | 279,527 | 273,411 | 272,808 | 271,460 | 0.22% |
+
+All doses had the same modeled total of 4.11 million without intervention. The population proxy improved on epidemic-only planning, but most of that improvement also came from giving the planner the national average. The proxy's incremental gain ranged from 0.03% to 0.22% over that average-only comparison. The oracle gained less than 1% over the national average at every dose. See the [budget sweep](continuous_budget_summary.csv).
+
 ## Reproduce
 
 From the repository root, prepare the historical inputs and surveys using the [data setup guide](../us_weekly_information/REPRODUCE.md). Prepare the September tweet aggregates with the existing TBCOV pipeline. It requires the September 2020 archive and may take time.
@@ -127,6 +144,7 @@ python -m epidemic.us_case_calibrated_proxy --weeks 12
 python -m epidemic.us_case_calibration_bridge
 python -m epidemic.us_case_calibration_bridge --long-horizon
 python -m epidemic.us_case_calibration_bridge --growth-grid
+python -m epidemic.us_case_calibration_bridge --historical-budgets --continuous-calibration
 ```
 
 The first command builds county tweet features from the archive. The next command writes calibration and initialization files to outputs/weekly_case_calibration. The final command writes policy schedules, prediction errors, and paired simulation results to outputs/case_calibrated_proxy.

@@ -1,5 +1,7 @@
 # Technical reference: U.S. weekly allocation
 
+This page documents controlled scenarios with fixed transmission and synthetic starting states. The faster-spread scenario produced approximately 300 million modeled infections without intervention. For the historical analysis, see the [case-calibrated U.S. replay and its validation against reported cases](../case_calibrated_proxy/README.md).
+
 **Result.** In an 84-day simulation on the U.S. county network, adding early vaccine willingness to a population-based predictor reduced modeled infections from **93.03 million to 90.38 million** with the same weekly budget. That is **2.85% fewer than population only** and **7.82% fewer than an optimized plan without county behavioral information**. A separate synthetic experiment establishes what the same model can do when it is told the actual responsiveness of every county.
 
 [Week-by-week maps](#week-by-week-county-spread) · [What an oracle knows](#what-an-oracle-knows) · [Data](#datasets) · [Math and parameters](#model-and-parameters) · [Results](#results) · [Reproduce](REPRODUCE.md)
