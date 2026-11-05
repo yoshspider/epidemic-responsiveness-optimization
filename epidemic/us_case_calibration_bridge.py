@@ -1,5 +1,6 @@
 """Separate outbreak growth, duration and responsiveness scaling in the US replay."""
 
+import argparse
 from pathlib import Path
 
 import numpy as np
@@ -12,7 +13,18 @@ from .us_case_calibrated_proxy import CALIBRATION, DOSE, REFERENCE, simulate, pr
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument("--long-horizon", action="store_true",
+                       help="Evaluate 24 and 48 weeks using the case-fitted transmission rate")
+    modes.add_argument("--growth-grid", action="store_true",
+                       help="Evaluate raw masking over 12 weeks at three intermediate rates")
+    settings = parser.parse_args()
     out = Path("outputs/case_calibration_bridge")
+    if settings.long_horizon:
+        out = out.with_name("case_calibration_long_horizon")
+    elif settings.growth_grid:
+        out = out.with_name("case_calibration_growth_grid")
     out.mkdir(parents=True, exist_ok=True)
     fit = pd.read_csv(CALIBRATION / "summary.csv").set_index("model").loc["fit_both"]
     with np.load(CALIBRATION / "initial_holdout.npz") as initial:
@@ -29,8 +41,13 @@ def main():
     predictions = {key: predict(value, features, states)
                    for key, value in responses.items()}
     rows = []
-    for beta in (fit.beta_total, .36):
-        for blocks in (1, 3):
+    rates = (fit.beta_total,) if settings.long_horizon else (fit.beta_total, .36)
+    lengths = (6, 12) if settings.long_horizon else (1, 3)
+    if settings.growth_grid:
+        rates, lengths = (.22, .26, .30), (3,)
+        responses = {"raw": raw}
+    for beta in rates:
+        for blocks in lengths:
             matrices = flows * blocks
             shape = (len(matrices), len(n))
             args = (n, s, i)

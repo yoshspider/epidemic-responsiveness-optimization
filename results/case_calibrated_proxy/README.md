@@ -91,6 +91,30 @@ The epidemic-only policy avoids **3.39 million** modeled infections in the raw s
 
 Each bridge cell compares the oracle against the planner using a constant 0.5. The big raw-score difference in the high-transmission 12-week cell includes a correction to the assumed overall response level. A planner given only the national mean response reduced the modeled total from 131.65M to 44.68M. The oracle then reduced it to 41.11M, an additional **3.57M (8.0%)** from knowing the county scores in this high-transmission setting. The high transmission coefficient is an assumed sensitivity setting. See the [full bridge](bridge_summary.csv) and [paired November diagnostic](bridge_november_paired.csv).
 
+## Longer horizons and intermediate growth
+
+With fitted transmission, $\beta=0.139$ per day is close to the daily removal probability of 0.133. In the simple homogeneous, fully susceptible approximation, their ratio is about 1.05 before intervention. For comparison, the earlier high-transmission benchmark at $\beta=0.36$ has a ratio of about 2.70. At the lower rate, allocating the weekly dose usually suppresses spread early. Extra weeks can add substantial infections to the **no-intervention** run while adding few to the intervention runs, leaving little additional room for differences between those policies.
+
+The long-horizon sensitivity repeats the November mobility sequence for 24 and 48 weeks, with the same starting state and weekly budget rule as the bridge. These are simulations beyond the observed replay window. The intermediate growth sensitivity instead keeps the horizon at 12 weeks, uses raw July masking, and varies the total transmission coefficient across 0.22, 0.26 and 0.30 per day. It compares the county predictor and oracle against a planner that knows only the national average score, to separate county-specific information from adjusting the overall assumed effect.
+
+| Horizon at fitted rate | No intervention | Raw masking oracle advantage | Ranked masking oracle advantage |
+|---|---:|---:|---:|
+| 4 weeks | 2.16M | 11,404 (2.58%) | 20,419 (3.17%) |
+| 12 weeks | 6.54M | 12,167 (2.35%) | 72,206 (7.96%) |
+| 24 weeks | 12.48M | 12,863 (2.47%) | 114,986 (11.86%) |
+| 48 weeks | 20.05M | 12,815 (2.46%) | 125,478 (12.78%) |
+
+The two right-hand columns compare against epidemic-only planning separately within each response scale. The ranked masking predictor itself avoids about 33,600 infections at 48 weeks (3.42%). The rank experiment changes the assumed dose response, so its oracle percentage is distinct from the earlier HHS predictor's 7.82%. The 4- and 12-week rows come from the bridge with November initialization. See the [24- and 48-week results](long_horizon_summary.csv).
+
+| Assumed total rate, 12 weeks | Additional infections avoided by the population proxy | Additional infections avoided by the oracle |
+|---|---:|---:|
+| 0.22/day | 28,362 | 65,480 |
+| 0.26/day | 135,029 | 298,740 |
+| 0.30/day | 536,228 | 1,172,957 |
+| 0.36/day | 1,502,398 | 3,568,432 |
+
+Each column is relative to the national-average planner under the same epidemic and raw masking assumption. The last row comes from the earlier bridge. The other rows are in the [intermediate growth results](growth_grid_summary.csv).
+
 ## Reproduce
 
 From the repository root, prepare the historical inputs and surveys using the [data setup guide](../us_weekly_information/REPRODUCE.md). Prepare the September tweet aggregates with the existing TBCOV pipeline. It requires the September 2020 archive and may take time.
@@ -101,6 +125,8 @@ python -m epidemic.us_weekly_case_calibration
 python -m epidemic.us_case_calibrated_proxy
 python -m epidemic.us_case_calibrated_proxy --weeks 12
 python -m epidemic.us_case_calibration_bridge
+python -m epidemic.us_case_calibration_bridge --long-horizon
+python -m epidemic.us_case_calibration_bridge --growth-grid
 ```
 
 The first command builds county tweet features from the archive. The next command writes calibration and initialization files to outputs/weekly_case_calibration. The final command writes policy schedules, prediction errors, and paired simulation results to outputs/case_calibrated_proxy.
