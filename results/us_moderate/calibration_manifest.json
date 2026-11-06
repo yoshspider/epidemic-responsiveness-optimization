@@ -1,6 +1,0 @@
-{
-  "target": "40% expected prevention for fixed population-proportional allocation under responsiveness uncertainty",
-  "prior": "Known population-weighted proxy histogram only; county labels randomized by fresh prior sampling, seeds1002000\u20131002007",
-  "interpretation": "Reference budget chosen without location-specific true responsiveness; optimized uninformed network policy is a stronger additional comparator and may exceed40%",
-  "evaluation": "All informed, predicted and uninformed policies receive exactly the frozen per-capita resource budget; actual county map is not used to tune dose"
-}

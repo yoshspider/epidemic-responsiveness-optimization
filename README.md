@@ -2,7 +2,7 @@
 
 Can county-level behavioral information improve the allocation of a fixed epidemic-intervention budget?
 
-**Main experiment:** [Case-calibrated proxy analysis](results/case_calibrated_proxy/README.md) compares three planners over the same twelve weeks: epidemic only, a county predictor, and exact county scores. The replay uses NYT cases, observed mobility, and paired stochastic runs.
+**Main experiment:** [Case-calibrated proxy analysis](results/README.md) compares three planners over the same twelve weeks: epidemic only, a county predictor, and exact county scores. The replay uses NYT cases, observed mobility, and paired stochastic runs.
 
 The project studies how knowledge of county responsiveness changes allocation in a mobility-coupled SIR model. The current code reproduces the U.S. county replay.
 
@@ -18,7 +18,7 @@ In the 12-week U.S. replay, the reference with no added intervention produced **
 | County predictor | 3,455,778 | **1.27%** |
 | Exact county scores (oracle) | 3,326,142 | **4.97%** |
 
-The case data calibrate transmission. The budget target is illustrative, and the intervention effect uses county masking ranks as a proxy for responsiveness. [Smaller-budget methods and results](results/case_calibrated_proxy/README.md#smaller-intervention-budget)
+The case data calibrate transmission. The budget target is illustrative, and the intervention effect uses county masking ranks as a proxy for responsiveness. [Smaller-budget methods and results](results/README.md#results)
 
 ## Reproduce the result
 
@@ -39,4 +39,4 @@ python -m unittest discover -s tests -v
 | `responsiveness_mechanisms.py` | Simulate expected infections and optimize the weekly allocation |
 | `us_case_calibrated_proxy.py` | Build county predictions and compare the three plans in matched stochastic runs |
 
-[Replay methods and results](results/case_calibrated_proxy/README.md) · [Data sources](DATA_SOURCES.md) · [Midterm archive with earlier code, results, and maps](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/02695ee)
+[Replay methods and results](results/README.md) · [Data sources](results/README.md#data-sources) · [Midterm archive with earlier code, results, and maps](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/02695ee)
