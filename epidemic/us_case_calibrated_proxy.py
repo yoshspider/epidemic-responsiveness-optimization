@@ -15,7 +15,7 @@ from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from .responsiveness_mechanisms import force, objective, optimize
+from .responsiveness_mechanisms import RECOVERY_PROBABILITY, force, objective, optimize
 
 CALIBRATION = Path("outputs/weekly_case_calibration")
 OUT = Path("outputs/case_calibrated_proxy")
@@ -39,13 +39,12 @@ def predict(target, features, states):
 def simulate(plan, truth, n, s, i, matrices, beta, m, uniforms):
     s, i = s.astype(np.int64), i.astype(np.int64)
     initial = s.sum()
-    recovery = -np.expm1(-1 / 7)
     weekly_beta = np.broadcast_to(np.asarray(beta, dtype=float), (len(matrices),))
     for day, (u_new, u_recovered) in enumerate(uniforms):
         week = day // 7
         h = force(i, n, truth, plan[week], matrices[week], weekly_beta[week], m, "recipient")
         new = binom.ppf(u_new, s, -np.expm1(-h)).astype(np.int64)
-        recovered = binom.ppf(u_recovered, i, recovery).astype(np.int64)
+        recovered = binom.ppf(u_recovered, i, RECOVERY_PROBABILITY).astype(np.int64)
         s -= new
         i += new - recovered
     return int(initial - s.sum())

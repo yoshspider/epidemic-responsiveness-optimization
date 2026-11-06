@@ -2,6 +2,8 @@
 
 Raw sources are downloaded separately and retain their source-specific terms. No individual tweet records or large raw archives are included in Git.
 
+The active replay uses NYT county cases and masking, Census populations, GeoDS mobility, and CDC SVI. The remaining sources below document earlier experiments.
+
 | Source | Role | Documentation |
 |---|---|---|
 | The New York Times COVID county data | Historical case initialization and retrospective transmission calibration | https://github.com/nytimes/covid-19-data |

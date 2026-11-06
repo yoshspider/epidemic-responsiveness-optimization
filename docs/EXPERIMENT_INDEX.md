@@ -1,6 +1,8 @@
 # Experiment index
 
-## Current entry points
+The commands below belong to the [midterm archive](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/02695ee). The [main README](../README.md#reproduce-the-result) lists the current replay commands.
+
+## Archived entry points
 
 | Purpose | Module |
 |---|---|

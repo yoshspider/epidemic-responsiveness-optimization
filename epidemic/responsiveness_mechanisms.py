@@ -8,6 +8,8 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.special import expit, logit
 
+RECOVERY_PROBABILITY = -np.expm1(-1 / 7)
+
 
 def force(i, n, p, dose, matrix, beta, mobility, mechanism):
     if mechanism == 'recipient':
@@ -34,7 +36,7 @@ def objective(dose, n, s0, i0, responses, matrices, beta, mobility, mechanism, g
     worlds = p.shape[1]
     s = np.repeat(s0[:, None], worlds, axis=1)
     i = np.repeat(i0[:, None], worlds, axis=1)
-    rho = -np.expm1(-1 / 7)
+    rho = RECOVERY_PROBABILITY
     protection = np.exp(-p[None, :, :] * weekly_dose[:, :, None] /
                         (2 if mechanism == 'both_ends' else 1))
     initial_s = s.copy()

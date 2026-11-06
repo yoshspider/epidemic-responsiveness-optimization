@@ -7,7 +7,8 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import brentq, least_squares
 
-from .us_proxy_study import national_matrices
+from .data import WEEKS, national_matrices
+from .responsiveness_mechanisms import RECOVERY_PROBABILITY
 
 
 def main():
@@ -26,7 +27,7 @@ def main():
     matrices = national_matrices(counties, out)
     periods = []
     corrections = []
-    for start, matrix in zip(pd.date_range("2020-09-07", periods=12, freq="7D"), matrices):
+    for start, matrix in zip(WEEKS, matrices, strict=True):
         recent = counts.loc[start - pd.Timedelta(days=1)].to_numpy()
         removed = counts.loc[start - pd.Timedelta(days=8)].to_numpy()
         valid = (recent >= removed) & (recent <= n) & (removed >= 0)
@@ -51,7 +52,7 @@ def main():
             prevalence = i / n
             hazard = local * prevalence + mobility * (matrix @ prevalence)
             new = s * -np.expm1(-hazard)
-            i += new - i * -np.expm1(-1 / 7)
+            i += new - i * RECOVERY_PROBABILITY
             s -= new
             daily.append(new)
         return np.asarray(daily), (s, i)

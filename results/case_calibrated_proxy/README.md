@@ -44,12 +44,13 @@ The smaller budget reduces the assumed overall intervention impact to about 50% 
 
 ## Reproduce
 
-Prepare the [case, mobility, survey, and county data](../us_weekly_information/REPRODUCE.md#2-download-and-prepare-the-inputs). This comparison uses the national bootstrap data, including the CDC SVI file.
+Install the package with python -m pip install -e . and run these commands from the repository root. The data command prepares the cases, mobility, surveys, and CDC SVI county features.
 
 ```bash
+python -m epidemic.data
 python -m epidemic.us_weekly_case_calibration
 python -m epidemic.us_case_calibrated_proxy
 python -m epidemic.us_case_calibrated_proxy --target-baseline 3500000
 ```
 
-The second command writes the summary, per-seed trials, and model settings to outputs/case_calibrated_main. The [previous experimental record](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/e3f7b5b/results/case_calibrated_proxy) preserves the budget, longer-horizon, and tweet feature diagnostics.
+The default replay writes results to outputs/case_calibrated_main. The smaller-budget run writes to outputs/case_calibrated_main_target_3.5e+06. The [previous experimental record](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/e3f7b5b/results/case_calibrated_proxy) preserves the budget, longer-horizon, and tweet feature diagnostics.

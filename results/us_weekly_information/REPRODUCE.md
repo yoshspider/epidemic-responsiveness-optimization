@@ -1,5 +1,7 @@
 # Reproduce the weekly U.S. experiment
 
+Check out the [midterm archive at commit `02695ee`](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/02695ee) before using the commands below. The current branch provides the [case-calibrated replay](../case_calibrated_proxy/README.md#reproduce).
+
 This guide starts from a fresh checkout. Run all commands at the repository root. The published CSVs and plots are in this folder; reruns write to ignored `data/` and `outputs/`. Keep the published tables as references when checking a rerun. No GPU, PPO training, TBCOV download, or historical case fitting is needed for this experiment.
 
 ## 1. Set up Python

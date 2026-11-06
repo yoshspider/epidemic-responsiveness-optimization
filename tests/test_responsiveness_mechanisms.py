@@ -3,7 +3,6 @@ import unittest
 import numpy as np
 from scipy import sparse
 from epidemic.responsiveness_mechanisms import checks, objective, allocate
-from epidemic.us_proxy_network import loss_gradient
 
 
 class ResponsivenessMechanismTests(unittest.TestCase):
@@ -31,13 +30,15 @@ class ResponsivenessMechanismTests(unittest.TestCase):
     def test_finite_difference_gradients_and_strength_normalization(self):
         checks()
 
-    def test_recipient_mechanism_matches_previous_simulator(self):
+    def test_constant_weekly_rates_match_scalar_rate(self):
         n = np.array([1000., 1500., 2000.])
         matrix = sparse.csr_matrix([[0., .6, .4], [.4, 0., .6], [.7, .3, 0.]])
         matrices = [matrix] * 12
         dose = np.array([.3, .8, .6]); p = np.array([.2, .7, .9])
         value, grad = objective(dose, n, n * .99, n * .01, p, matrices, .3, .15, 'recipient')
-        reference, reference_grad = loss_gradient(dose, n, n * .99, n * .01, p, matrices, np.full(12, .3), .15)
+        reference, reference_grad = objective(
+            dose, n, n * .99, n * .01, p, matrices, np.full(12, .3), .15, "recipient"
+        )
         np.testing.assert_allclose(value, reference, rtol=1e-10)
         np.testing.assert_allclose(grad, reference_grad, rtol=1e-10)
 

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "epidemic-responsiveness"
 version = "0.1.0"
-description = "Controlled and empirical-input studies of behavioral information in epidemic resource allocation"
+description = "Case-calibrated U.S. county study of behavioral information in epidemic resource allocation"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -13,12 +13,9 @@ dependencies = [
     "scipy>=1.11,<2",
     "pandas>=2.0,<4",
     "scikit-learn>=1.4,<2",
-    "matplotlib>=3.7,<4",
-    "pyshp>=2.3,<4",
 ]
 
 [project.optional-dependencies]
-rl = ["torch>=2.2,<3"]
 dev = ["autopep8>=2.3,<3"]
 
 [tool.setuptools.packages.find]

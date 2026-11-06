@@ -1,7 +1,0 @@
-{
-  "stochastic": true,
-  "stochastic_adoption": true,
-  "budget": 1000,
-  "horizon_days": 14,
-  "rollout_backend": "numpy"
-}

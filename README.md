@@ -4,7 +4,7 @@ Can county-level behavioral information improve the allocation of a fixed epidem
 
 **Main experiment:** [Case-calibrated proxy analysis](results/case_calibrated_proxy/README.md) compares three planners over the same twelve weeks: epidemic only, a county predictor, and exact county scores. The replay uses NYT cases, observed mobility, and paired stochastic runs.
 
-The project studies how knowledge of county responsiveness changes allocation in a mobility-coupled SIR model. It includes controlled mechanism experiments, U.S. county counterfactuals, prediction checks, PPO experiments, and geographic figures.
+The project studies how knowledge of county responsiveness changes allocation in a mobility-coupled SIR model. The current code reproduces the U.S. county replay.
 
 **Interpretation:** synthetic mechanism results demonstrate potential. Assigning survey fractions as responsiveness is a modeling assumption; the empirical-input simulations do not identify causal effects of spending.
 
@@ -20,74 +20,23 @@ In the 12-week U.S. replay, the reference with no added intervention produced **
 
 The case data calibrate transmission. The budget target is illustrative, and the intervention effect uses county masking ranks as a proxy for responsiveness. [Smaller-budget methods and results](results/case_calibrated_proxy/README.md#smaller-intervention-budget)
 
-## Start here
+## Reproduce the result
+
+Run from the repository root in Python 3.11 or newer. The data command downloads the required public sources and reuses cached copies.
 
 ```bash
-python -m venv .venv
-# Activate the environment, then:
 python -m pip install -e .
-python -m epidemic.ideal_information_benchmark --days 84
-python -m epidemic.moderate_ideal_confirm
-```
-
-The synthetic experiments need no downloaded datasets. Run commands from the repository root. Generated files go under ignored `outputs/`; reviewed snapshots are in [`results/`](results/).
-
-For the complete tests and PPO modules, install CPU PyTorch separately or use the `rl` extra:
-
-```bash
-python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+python -m epidemic.data
+python -m epidemic.us_weekly_case_calibration
+python -m epidemic.us_case_calibrated_proxy --target-baseline 3500000
 python -m unittest discover -s tests -v
 ```
 
-[Larger-budget comparison](results/case_calibrated_proxy/README.md#results) · [Earlier controlled simulations and maps](results/us_weekly_information/README.md)
+| Module | Purpose |
+|---|---|
+| `data.py` | Download and prepare the county data and mobility matrices |
+| `us_weekly_case_calibration.py` | Fit the case-based epidemic and write the replay inputs |
+| `responsiveness_mechanisms.py` | Simulate expected infections and optimize the weekly allocation |
+| `us_case_calibrated_proxy.py` | Build county predictions and compare the three plans in matched stochastic runs |
 
-## Model and comparisons
-
-Daily infections follow a bounded SIR hazard, with recovery probability `1-exp(-1/7)`. County populations are conserved. Weekly incoming mobility matrices have destination rows and source columns; self edges are removed and incoming rows normalized.
-
-The main intervention mechanism is:
-
-```text
-lambda_i(t) = exp(-p_i * d_i(t)) * lambda_i_without_intervention(t)
-d_i(t) = kappa * a_i(t) / N_i
-```
-
-Here `a_i` is effort, `p_i` is responsiveness, and `kappa` converts effort into effect. Dose units are **not calibrated dollars**. Comparisons use identical budgets, disease assumptions and execution response surfaces.
-
-The independent-county benchmark computes globally optimal **static allocations on a finite dose grid**. National studies include both a separable horizon heuristic and a network-aware constrained optimizer with an exact finite-difference-checked SIR adjoint. The latter is a local numerical optimizer, not a proven global optimum. Static-horizon experiments are distinct from the weekly PPO experiments retained in `proposal_ppo.py`.
-
-## U.S. data and reproduction
-
-Sources include NYT COVID reports, GeoDS weekly mobility, Census populations, NYT/Dynata masking, HHS county vaccine-hesitancy estimates, CTIS, and TBCOV. NYT masking and HHS hesitancy each cover the same 3,142 Census county identifiers; HHS estimates are modeled small-area predictions, not independent direct surveys of every county.
-
-```bash
-python -m epidemic.bootstrap_us --mobility
-python -m epidemic.national_mask_prediction
-python -m epidemic.us_proxy_prepare
-python -m epidemic.us_proxy_study
-python -m epidemic.us_proxy_figures
-```
-
-Acquisition downloads substantial public datasets. The bootstrap does not download the very large TBCOV archives; their separate pipeline is retained for the social-media experiments. Raw datasets, tweet records, local dependencies and temporary publishing files are excluded from Git.
-
-For network-aware evaluation, for example:
-
-```bash
-python -m epidemic.us_proxy_network_study --metric mask --dose 1 --beta 0.3
-```
-
-This is a scenario, not a fitted real-world intervention dose. The moderate-budget calibration and all other scenario definitions are documented in the result manifests and [`docs/EXPERIMENT_INDEX.md`](docs/EXPERIMENT_INDEX.md).
-
-## Geographic outputs
-
-The results snapshot includes county input maps, week 4/8/12 spread comparisons, allocation-benefit maps, and parameter sensitivity figures. County losses as well as gains are displayed; national improvements do not imply every county improves.
-
-## Research limitations
-
-1. Mask use, vaccine willingness, and sentiment measure behavior or attitudes, not the marginal response to intervention spending.
-2. Controlled U.S.-geography outbreaks use synthetic initial epidemics on actual populations and networks. Historical replay is separately labeled and uses retrospectively fitted transmission.
-3. Reported Monte Carlo intervals quantify epidemic noise conditional on the assumed proxy and model. They do not include proxy validity, survey error, reporting or parameter uncertainty.
-4. Case-table aggregates and invalid initial states are explicitly excluded in historical replay. Synthetic geographic experiments include all 3,142 counties.
-5. A large synthetic information effect does not guarantee a double-digit gain for empirical proxies or learned policies. Population-only and uniform-spending controls are retained.
-
-[Data sources and attribution](DATA_SOURCES.md) · [Experiment index](docs/EXPERIMENT_INDEX.md) · [Historical notes](docs/archive/)
+[Replay methods and results](results/case_calibrated_proxy/README.md) · [Data sources](DATA_SOURCES.md) · [Midterm archive with earlier code, results, and maps](https://github.com/yoshspider/epidemic-responsiveness-optimization/tree/02695ee)
